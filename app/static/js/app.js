@@ -1,11 +1,7 @@
 document.addEventListener("DOMContentLoaded", function () {
     var searchInput = document.getElementById("searchInput");
-    var scanBtn = document.getElementById("scanBtn");
-    var stopScanBtn = document.getElementById("stopScanBtn");
-    var scannerContainer = document.getElementById("scannerContainer");
     var searchForm = document.getElementById("searchForm");
     var resultsContainer = document.getElementById("resultsContainer");
-    var html5QrCode = null;
     var debounceTimer = null;
     var currentRequest = null;
 
@@ -120,38 +116,4 @@ document.addEventListener("DOMContentLoaded", function () {
         return div.innerHTML;
     }
 
-    // ── Barcode Scanner ──────────────────────────────────
-    scanBtn.addEventListener("click", function () {
-        scannerContainer.classList.remove("d-none");
-        scanBtn.disabled = true;
-
-        html5QrCode = new Html5Qrcode("reader");
-        html5QrCode.start(
-            { facingMode: "environment" },
-            { fps: 10, qrbox: { width: 250, height: 150 } },
-            function (decodedText) {
-                searchInput.value = decodedText;
-                stopScanner();
-                doSearch(decodedText);
-            },
-            function () {}
-        ).catch(function (err) {
-            scannerContainer.innerHTML =
-                '<div class="alert alert-warning">Camera not available: ' + err + "</div>";
-        });
-    });
-
-    stopScanBtn.addEventListener("click", stopScanner);
-
-    function stopScanner() {
-        if (html5QrCode) {
-            html5QrCode.stop().then(function () {
-                html5QrCode.clear();
-                html5QrCode = null;
-            }).catch(function () {});
-        }
-        scannerContainer.classList.add("d-none");
-        scanBtn.disabled = false;
-        searchInput.focus();
-    }
 });

@@ -18,10 +18,6 @@
         </div>
     </form>
 
-    <div id="scannerContainer" class="scanner-container d-none">
-        <div id="reader"></div>
-        <button type="button" class="btn btn-sm btn-secondary mt-2" id="stopScanBtn">Stop Scanner</button>
-    </div>
 </div>
 
 <div id="resultsContainer">
@@ -75,6 +71,37 @@
 {% endblock %}
 
 {% block scripts %}
-<script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
 <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+<script type="module">
+import { StrichSDK, PopupScanner } from "https://cdn.jsdelivr.net/npm/@pixelverse/strichjs-sdk@latest";
+
+const STRICH_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIyMTFiZGM5NS1mMzI0LTQ1NzQtODQwMC0wZjEyZDliNTFhNTYiLCJpc3MiOiJzdHJpY2guaW8iLCJhdWQiOlsiaHR0cHM6Ly9pdGVtcy5sb25nb3BzLmNsb3VkIl0sImlhdCI6MTc3MDc4MzQyMCwibmJmIjoxNzcwNzgzNDIwLCJjYXBhYmlsaXRpZXMiOnt9LCJ2ZXJzaW9uIjoxfQ.pusfRXvseNRAvsGPC1_pUqtxgqo-ljKwriBXtv8RKm4';
+
+async function initCamera() {
+    const btn = document.getElementById('scanBtn');
+    const hasCamera = await StrichSDK.hasCameraDevice();
+    if (!hasCamera) return;
+    try {
+        await StrichSDK.initialize(STRICH_KEY);
+        btn.onclick = openCameraScanner;
+    } catch (e) {
+        console.error('STRICH init failed:', e);
+    }
+}
+
+async function openCameraScanner() {
+    const barcodes = await PopupScanner.scan({
+        symbologies: ['ean13', 'ean8', 'upca', 'upce', 'code128'],
+        labels: { title: 'Scan Barcode' },
+        feedback: { audio: true, vibration: true }
+    });
+    if (barcodes && barcodes.length > 0) {
+        const input = document.getElementById('searchInput');
+        input.value = barcodes[0].data;
+        input.dispatchEvent(new Event('input'));
+    }
+}
+
+initCamera();
+</script>
 {% endblock %}
