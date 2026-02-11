@@ -78,14 +78,15 @@
 import {
     BarcodeCapture, BarcodeCaptureSettings, BarcodeCaptureOverlay,
     Symbology, barcodeCaptureLoader
-} from "https://cdn.jsdelivr.net/npm/@scandit/web-datacapture-barcode@latest/+esm";
+} from "https://cdn.jsdelivr.net/npm/@scandit/web-datacapture-barcode@8.1.1/+esm";
 import {
-    Camera, DataCaptureContext, DataCaptureView, FrameSourceState
-} from "https://cdn.jsdelivr.net/npm/@scandit/web-datacapture-core@latest/+esm";
+    Camera, CameraSwitchControl, DataCaptureContext, DataCaptureView, FrameSourceState,
+    RectangularViewfinder, RectangularViewfinderLineStyle, RectangularViewfinderStyle
+} from "https://cdn.jsdelivr.net/npm/@scandit/web-datacapture-core@8.1.1/+esm";
 
 const SCANDIT_KEY = 'At8Hbmc5QHr8EvzGx/sG0Kc2d4cODT7sNCWU7OJAIqe0JvWqnwJqy5RVZgz3bzXiBiNjAnliRCziQIc3vnZJELVB8FanR6tgZWjFowYr5PH1LFVBjDsc5PERsAKHTaUM/kGsAn1gcRKtdtSUYURG+pVfRdmpYexAe2sUhhta+Zkad/z+RyGM9bdhn5P8ZjoeEyFSloZN9OKeTTSgQXjYvKpla2ndbv4Dg0tKTwNIoeL0RJ78XHPlqSthoacRYgpPfHB+/bpcAtKzYOhWNGPD3y1hghbLEtP1T1gFTQp+hLstYr6JdWsM1OpkMRLdZvIwo3ZymUVL8wf3e/8cR1ghXWhgojFRNjAkqHVNjilX3TVqW/aisGaplJZTZtGpbChj/2RdI49nnvluanC2m0dpeS8InPdSY5dNJgAZ0fpoLIN7bBDXunLOsQsfc+Z3PyJ2zBLW2NFoLzYwADBFhGYS295kgzIyS3IujFi5GFgYFl+leovIf39wX9sAmXTkfhYuz3rVurtOPM5+Ttp4FTA4qScTuZNpfB4UWsvx0yT2VRhiYhqo9JUWM6AdW05IoaWrzqevGiBe9yuBekoKi5/z7nR+wldgseYjxbZAZec9qKsM6ka6kbOO0Mob0t0gGquqyKwvUZVv3CWw75d53+uCjVKmMO1pWQZIf5c2PEKwQenaqwNb97L16Dl8GTREeCA513h1EwucHXnkUopF4Ej8zKhkqhBz1xXGEnL5wxa6alxJqk3y/xY0gZhTBAoC0lhDJkZqzlhKPldUL4to7po3JnSR0zGALyRkucwLyTp6Ol5livt+jzBwCRQEIQ7yYYPUbsqwzEA5yslVhLTPgf9GNNXaWkHVC4Sp1r+QVYOvBUADBHAod0KIIWHVgLmJ7WNaUGG9/VhPTl1ZmEU5KvFZy3xYBewxW+TrWMVEs2T9l4BRtznRi+uACe8fnxqWOewX7W+ExN1eyDedSpTogGvQDyGuRIjWQogxPsyY/De02aAB4/l8V/4PsplZyDi3z1A7eZScDkWEjnP2J6CrR3FMK602eX3+DcvWd/iZSH6XrJDAqUzcEH0oPZHp7F5DreixhZ72wrVTnv2ytgaZO5zSDwd4/8lxgKSZQOayrWZkerd3J9hixSXMW6TQfNlSFYndXwc7vEnjl7CesacHVzMbnQNFNZjHu765Y8aagm4OMZLOdFymrEjymHrPaKLs/yrgqyo=';
 
-let context, camera, barcodeCapture, view, scannerReady = false;
+let context, camera, barcodeCapture, view, overlay, viewfinder, scannerReady = false;
 
 function upceToUpca(upce) {
     if (upce.length !== 8 && upce.length !== 6) return upce;
@@ -110,28 +111,56 @@ function upceToUpca(upce) {
 }
 
 async function initScanner() {
-    context = await DataCaptureContext.forLicenseKey(SCANDIT_KEY, {
-        libraryLocation: "https://cdn.jsdelivr.net/npm/@scandit/web-datacapture-barcode@latest/sdc-lib/",
-        moduleLoaders: [barcodeCaptureLoader()]
-    });
+    // 1. Create view first for immediate camera preview
+    view = new DataCaptureView();
 
+    // 2. Set up camera with recommended barcode settings
     camera = Camera.pickBestGuess();
     await camera.applySettings(BarcodeCapture.recommendedCameraSettings);
+
+    // 3. Start camera streaming immediately (fire-and-forget)
+    void camera.switchToDesiredState(FrameSourceState.On);
+
+    // 4. Connect view with camera for instant preview while WASM loads
+    view.connectToElement(document.getElementById('scannerViewport'), { camera });
+    view.showProgressBar();
+
+    // 5. Create context (loads WASM - the slow part)
+    context = await DataCaptureContext.forLicenseKey(SCANDIT_KEY, {
+        moduleLoaders: [barcodeCaptureLoader()]
+    });
+    view.hideProgressBar();
+
+    // 6. Wire view to context and set camera as frame source
+    await view.setContext(context);
     await context.setFrameSource(camera);
 
+    // 7. Configure symbologies (warehouse-appropriate set)
     const settings = new BarcodeCaptureSettings();
     settings.enableSymbologies([
-        Symbology.EAN13UPCA, Symbology.EAN8, Symbology.UPCE, Symbology.Code128
+        Symbology.EAN13UPCA, Symbology.EAN8, Symbology.UPCE,
+        Symbology.Code128, Symbology.Code39, Symbology.InterleavedTwoOfFive
     ]);
 
+    // 8. Create BarcodeCapture
     barcodeCapture = await BarcodeCapture.forContext(context, settings);
     await barcodeCapture.setEnabled(false);
 
+    // 9. Add camera switch control + overlay with viewfinder
+    view.addControl(new CameraSwitchControl());
+    overlay = await BarcodeCaptureOverlay.withBarcodeCaptureForView(barcodeCapture, view);
+    viewfinder = new RectangularViewfinder(
+        RectangularViewfinderStyle.Square,
+        RectangularViewfinderLineStyle.Light
+    );
+    await overlay.setViewfinder(viewfinder);
+
+    // 10. Register scan listener
     barcodeCapture.addListener({
-        didScan: async (_, session) => {
-            const barcode = session.newlyRecognizedBarcodes[0];
+        didScan: async (mode, session) => {
+            await mode.setEnabled(false);
+            const barcode = session.newlyRecognizedBarcode;
             if (!barcode) return;
-            await barcodeCapture.setEnabled(false);
             let code = barcode.data;
             if (barcode.symbology === Symbology.UPCE || (code.length === 8 && code[0] === '0')) {
                 code = upceToUpca(code);
@@ -143,19 +172,26 @@ async function initScanner() {
         }
     });
 
-    view = new DataCaptureView();
-    view.connectToElement(document.getElementById('scannerViewport'));
-    await view.setContext(context);
-    await BarcodeCaptureOverlay.withBarcodeCaptureForView(barcodeCapture, view);
-
+    // 11. Enable scanning
+    await barcodeCapture.setEnabled(true);
     scannerReady = true;
 }
 
 async function openScanner() {
     document.getElementById('scannerOverlay').classList.add('active');
-    if (!scannerReady) await initScanner();
-    await camera.switchToDesiredState(FrameSourceState.On);
-    await barcodeCapture.setEnabled(true);
+    if (!scannerReady) {
+        try {
+            await initScanner();
+        } catch (e) {
+            console.error('Scanner init failed:', e);
+            closeScanner();
+            return;
+        }
+    } else {
+        if (overlay && viewfinder) await overlay.setViewfinder(viewfinder);
+        await camera.switchToDesiredState(FrameSourceState.On);
+        await barcodeCapture.setEnabled(true);
+    }
 }
 
 async function closeScanner() {
@@ -164,7 +200,6 @@ async function closeScanner() {
     if (camera) await camera.switchToDesiredState(FrameSourceState.Off);
 }
 
-// Show FAB and wire up events
 document.getElementById('scanBtn').style.display = '';
 document.getElementById('scanBtn').addEventListener('click', openScanner);
 document.getElementById('scannerClose').addEventListener('click', closeScanner);
