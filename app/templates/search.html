@@ -38,6 +38,34 @@
 {% endif %}
 
 {% if results %}
+{% if results|length == 1 %}
+{% set item = results[0] %}
+<div class="item-card" onclick="window.location='/item/{{ item.SKU|int }}'">
+    <div class="item-card-header">
+        <h5 class="item-card-title">{{ item.DESCRIPTION }}</h5>
+        <span class="sku-badge">SKU {{ item.SKU }}</span>
+    </div>
+    <div class="item-card-grid">
+        <div class="item-card-field">
+            <div class="item-card-label">Size</div>
+            <div class="item-card-value">{{ item.SIZE or '—' }}</div>
+        </div>
+        <div class="item-card-field">
+            <div class="item-card-label">Pack</div>
+            <div class="item-card-value">{{ item.QTY2 if item.QTY2 is not none else '—' }}</div>
+        </div>
+        <div class="item-card-field">
+            <div class="item-card-label">Location</div>
+            <div class="item-card-value">{{ item.LOCATION or '—' }}</div>
+        </div>
+        <div class="item-card-field">
+            <div class="item-card-label">QOH</div>
+            <div class="item-card-value">{{ item.QOH_2 if item.QOH_2 is not none else '—' }}</div>
+        </div>
+    </div>
+    <div class="item-card-tap">Tap for full details</div>
+</div>
+{% else %}
 <div class="table-responsive">
     <table class="table data-table">
         <thead>
@@ -64,6 +92,7 @@
         </tbody>
     </table>
 </div>
+{% endif %}
 {% elif query and not error %}
 <div class="alert alert-warning mt-3">No items found.</div>
 {% endif %}
