@@ -88,33 +88,13 @@ document.addEventListener("DOMContentLoaded", function () {
             return;
         }
 
-        if (count === 1) {
-            var item = results[0];
-            var sku = parseInt(item.SKU, 10);
-            html += renderItemCard(item, sku);
-            resultsContainer.innerHTML = html;
-            return;
-        }
-
-        html += '<div class="table-responsive"><table class="table data-table">' +
-            "<thead><tr>" +
-            "<th>SKU</th><th>Description</th><th>Size</th><th>Pack</th><th>Location</th><th>QOH</th>" +
-            "</tr></thead><tbody>";
-
+        html += '<div class="item-card-list">';
         for (var i = 0; i < results.length; i++) {
             var item = results[i];
             var sku = parseInt(item.SKU, 10);
-            html += '<tr class="clickable-row" onclick="window.location=\'/item/' + sku + '\'">' +
-                '<td class="fw-bold">' + sku + "</td>" +
-                "<td>" + escapeHtml(item.DESCRIPTION || "") + "</td>" +
-                "<td>" + escapeHtml(item.SIZE || "") + "</td>" +
-                "<td>" + (item.QTY2 != null ? item.QTY2 : "") + "</td>" +
-                '<td class="text-nowrap">' + escapeHtml(item.LOCATION || "") + "</td>" +
-                "<td>" + (item.QOH_2 != null ? item.QOH_2 : "-") + "</td>" +
-                "</tr>";
+            html += renderItemCard(item, sku);
         }
-
-        html += "</tbody></table></div>";
+        html += '</div>';
         resultsContainer.innerHTML = html;
     }
 
@@ -142,7 +122,6 @@ document.addEventListener("DOMContentLoaded", function () {
                     '<div class="item-card-value">' + (item.QOH_2 != null ? item.QOH_2 : "—") + '</div>' +
                 '</div>' +
             '</div>' +
-            '<div class="item-card-tap">Tap for full details</div>' +
         '</div>';
     }
 
