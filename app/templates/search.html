@@ -86,6 +86,28 @@ async function initCamera() {
     }
 }
 
+function upceToUpca(upce) {
+    if (upce.length !== 8 && upce.length !== 6) return upce;
+    const d = upce.length === 8 ? upce.slice(1, 7) : upce;
+    const ns = upce.length === 8 ? upce[0] : '0';
+    let mfr, prod;
+    switch (d[5]) {
+        case '0': case '1': case '2':
+            mfr = d[0] + d[1] + d[5] + '00'; prod = '00' + d[2] + d[3] + d[4]; break;
+        case '3':
+            mfr = d[0] + d[1] + d[2] + '00'; prod = '000' + d[3] + d[4]; break;
+        case '4':
+            mfr = d[0] + d[1] + d[2] + d[3] + '0'; prod = '0000' + d[4]; break;
+        default:
+            mfr = d[0] + d[1] + d[2] + d[3] + d[4]; prod = '0000' + d[5]; break;
+    }
+    const body = ns + mfr + prod;
+    let sum = 0;
+    for (let i = 0; i < 11; i++) sum += parseInt(body[i]) * (i % 2 === 0 ? 3 : 1);
+    const check = (10 - (sum % 10)) % 10;
+    return body + check;
+}
+
 async function openCameraScanner() {
     const barcodes = await PopupScanner.scan({
         symbologies: ['ean13', 'ean8', 'upca', 'upce', 'code128'],
@@ -93,8 +115,12 @@ async function openCameraScanner() {
         feedback: { audio: true, vibration: true }
     });
     if (barcodes && barcodes.length > 0) {
+        let code = barcodes[0].data;
+        if (barcodes[0].symbology === 'upce' || (code.length === 8 && code[0] === '0')) {
+            code = upceToUpca(code);
+        }
         const input = document.getElementById('searchInput');
-        input.value = barcodes[0].data;
+        input.value = code;
         input.dispatchEvent(new Event('input'));
     }
 }
