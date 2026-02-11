@@ -1,0 +1,158 @@
+{% extends "base.html" %}
+
+{% block title %}{{ item.DESCRIPTION if item else 'Item' }} - Item Search{% endblock %}
+
+{% block content %}
+<a href="{{ url_for('search.index', q=request.args.get('q', '')) }}" class="btn-back mb-3">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+    Back to results
+</a>
+
+{% if error %}
+<div class="alert alert-danger mt-3">{{ error }}</div>
+{% endif %}
+
+{% if item %}
+<div class="detail-header">
+    <h2>{{ item.DESCRIPTION }}</h2>
+    <span class="sku-badge">SKU {{ item.SKU }}</span>
+</div>
+
+<div class="row g-3 mt-2">
+    <!-- Product Info -->
+    <div class="col-md-6">
+        <div class="detail-card">
+            <h6>Product Info</h6>
+            <dl>
+                <dt>Description</dt>
+                <dd>{{ item.DESCRIPTION }}</dd>
+                {% if item.EXTENDED_DESCRIPTION and item.EXTENDED_DESCRIPTION.strip() %}
+                <dt>Extended</dt>
+                <dd>{{ item.EXTENDED_DESCRIPTION }}</dd>
+                {% endif %}
+                {% if item.BRAND and item.BRAND.strip() %}
+                <dt>Brand</dt>
+                <dd>{{ item.BRAND }}</dd>
+                {% endif %}
+                <dt>Size</dt>
+                <dd>{{ item.SIZE }}</dd>
+                <dt>Pack</dt>
+                <dd>{{ item.QTY2 }}</dd>
+                {% if item.MFG_NO and item.MFG_NO.strip() %}
+                <dt>MFG #</dt>
+                <dd>{{ item.MFG_NO }}</dd>
+                {% endif %}
+                <dt>Category</dt>
+                <dd>{{ item.CATEGORY }}</dd>
+                <dt>Status</dt>
+                <dd>{{ item.STATUS }}</dd>
+            </dl>
+        </div>
+    </div>
+
+    <!-- UPC Codes -->
+    <div class="col-md-6">
+        <div class="detail-card">
+            <h6>UPC Codes</h6>
+            <dl>
+                {% if item.UPC1 and item.UPC1.strip() %}
+                <dt>UPC 1</dt>
+                <dd class="font-monospace">{{ item.UPC1 }}</dd>
+                {% endif %}
+                {% if item.UPC2 and item.UPC2.strip() %}
+                <dt>UPC 2</dt>
+                <dd class="font-monospace">{{ item.UPC2 }}</dd>
+                {% endif %}
+                {% if item.UPC3 and item.UPC3.strip() %}
+                <dt>UPC 3</dt>
+                <dd class="font-monospace">{{ item.UPC3 }}</dd>
+                {% endif %}
+                {% if item.UPC4 and item.UPC4.strip() %}
+                <dt>UPC 4</dt>
+                <dd class="font-monospace">{{ item.UPC4 }}</dd>
+                {% endif %}
+            </dl>
+        </div>
+    </div>
+
+    <!-- Inventory -->
+    <div class="col-md-6">
+        <div class="detail-card">
+            <h6>Inventory</h6>
+            <dl>
+                <dt>Location</dt>
+                <dd>{{ item.LOCATION or '-' }}</dd>
+                <dt>Qty on Hand</dt>
+                <dd>{{ item.QOH_2 if item.QOH_2 is not none else '-' }}</dd>
+                <dt>Avg Weekly Movement</dt>
+                <dd>{{ item.AVG_MOVEMENT }}</dd>
+                <dt>Sold PTD</dt>
+                <dd>{{ item.QTY_UOM2_PTD if item.QTY_UOM2_PTD is not none else '-' }}</dd>
+                <dt>Sold YTD</dt>
+                <dd>{{ item.QTY_UOM2_YTD if item.QTY_UOM2_YTD is not none else '-' }}</dd>
+                {% if item.LAST_SALE %}
+                <dt>Last Sale</dt>
+                <dd>{{ item.LAST_SALE }}</dd>
+                {% endif %}
+                {% if item.DATE_LR %}
+                <dt>Last Received</dt>
+                <dd>{{ item.DATE_LR }}</dd>
+                {% endif %}
+            </dl>
+        </div>
+    </div>
+
+    <!-- Pricing -->
+    <div class="col-md-6">
+        <div class="detail-card">
+            <h6>Pricing</h6>
+            <dl>
+                <dt>Net Cost</dt>
+                <dd>{{ "$%.2f"|format(item.NET_COST) if item.NET_COST is not none else '-' }}</dd>
+                <dt>Wholesale Price</dt>
+                <dd>{{ "$%.2f"|format(item.WHOLESALE_PRICE) if item.WHOLESALE_PRICE is not none else '-' }}</dd>
+                {% if item.LAST_RECEIPT_COST %}
+                <dt>Last Receipt Cost</dt>
+                <dd>{{ "$%.2f"|format(item.LAST_RECEIPT_COST) }}</dd>
+                {% endif %}
+                {% if item.AVG_INV_COST %}
+                <dt>Avg Inventory Cost</dt>
+                <dd>{{ "$%.2f"|format(item.AVG_INV_COST) }}</dd>
+                {% endif %}
+                {% if item.MSRP %}
+                <dt>MSRP</dt>
+                <dd>{{ "$%.2f"|format(item.MSRP) }}</dd>
+                {% endif %}
+            </dl>
+        </div>
+    </div>
+
+    <!-- Vendor -->
+    <div class="col-md-6">
+        <div class="detail-card">
+            <h6>Vendor</h6>
+            <dl>
+                <dt>Vendor #</dt>
+                <dd>{{ item.VENDOR_NO }}</dd>
+                {% if item.VENDOR_NAME %}
+                <dt>Name</dt>
+                <dd>{{ item.VENDOR_NAME }}</dd>
+                {% endif %}
+                {% if item.VENDOR_CITY %}
+                <dt>Location</dt>
+                <dd>{{ item.VENDOR_CITY }}{% if item.VENDOR_STATE %}, {{ item.VENDOR_STATE }}{% endif %}</dd>
+                {% endif %}
+                {% if item.VENDOR_CONTACT %}
+                <dt>Contact</dt>
+                <dd>{{ item.VENDOR_CONTACT }}</dd>
+                {% endif %}
+                {% if item.VENDOR_PHONE %}
+                <dt>Phone</dt>
+                <dd>{{ item.VENDOR_PHONE }}</dd>
+                {% endif %}
+            </dl>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

@@ -55,7 +55,7 @@
         </thead>
         <tbody>
             {% for item in results %}
-            <tr>
+            <tr class="clickable-row" onclick="window.location='/item/{{ item.SKU|int }}'">
                 <td class="fw-bold">{{ item.SKU }}</td>
                 <td>{{ item.DESCRIPTION }}</td>
                 <td>{{ item.SIZE }}</td>

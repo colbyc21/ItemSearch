@@ -213,6 +213,101 @@ body {
 /* ── Utility ───────────────────────────────────────────── */
 .text-muted { color: var(--text-muted) !important; }
 
+/* ── Clickable rows ────────────────────────────────────── */
+.clickable-row {
+    cursor: pointer;
+}
+
+.clickable-row:hover {
+    background: var(--brand-subtle) !important;
+}
+
+/* ── Back button ───────────────────────────────────────── */
+.btn-back {
+    display: inline-flex;
+    align-items: center;
+    gap: .35rem;
+    color: var(--text-muted);
+    text-decoration: none;
+    font-size: .85rem;
+    font-weight: 500;
+    padding: .35rem .75rem;
+    border-radius: var(--radius-sm);
+    transition: all var(--transition);
+    border: 1px solid var(--border);
+    background: var(--surface);
+}
+
+.btn-back:hover {
+    color: var(--text);
+    border-color: #ccc;
+    background: var(--surface-alt);
+}
+
+/* ── Detail page ───────────────────────────────────────── */
+.detail-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.detail-header h2 {
+    font-size: 1.4rem;
+    font-weight: 700;
+    margin: 0;
+}
+
+.sku-badge {
+    background: var(--surface-alt);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: .2rem .6rem;
+    font-size: .85rem;
+    font-weight: 600;
+    color: var(--text-muted);
+}
+
+.detail-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.25rem;
+    box-shadow: var(--shadow);
+    height: 100%;
+}
+
+.detail-card h6 {
+    font-size: .8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+    color: var(--text-muted);
+    margin-bottom: .75rem;
+    padding-bottom: .5rem;
+    border-bottom: 2px solid var(--border);
+}
+
+.detail-card dl {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: .3rem .75rem;
+    margin: 0;
+}
+
+.detail-card dt {
+    font-size: .8rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    white-space: nowrap;
+}
+
+.detail-card dd {
+    font-size: .9rem;
+    margin: 0;
+    word-break: break-word;
+}
+
 /* ── Responsive ────────────────────────────────────────── */
 @media (max-width: 768px) {
     html { font-size: 14px; }
