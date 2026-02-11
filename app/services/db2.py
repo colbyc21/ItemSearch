@@ -1,4 +1,5 @@
 import pyodbc
+from decimal import Decimal
 from app.config import DB2_CONNECTION_STRING
 
 
@@ -16,6 +17,18 @@ def _strip_row(columns, row):
 def _is_upc(term):
     """Check if search term looks like a UPC barcode (8-14 digits)."""
     return term.isdigit() and 8 <= len(term) <= 14
+
+
+def _format_cymd(val):
+    """Convert CYYMMDD decimal (e.g. 1250623) to MM/DD/YYYY string."""
+    if not val or val == Decimal("0"):
+        return None
+    s = str(int(val)).zfill(7)
+    century = 19 + int(s[0])
+    year = int(s[1:3])
+    month = int(s[3:5])
+    day = int(s[5:7])
+    return f"{month:02d}/{day:02d}/{century * 100 + year}"
 
 
 def _build_fuzzy_where(words):
@@ -127,7 +140,7 @@ def search_by_upc(upc):
 
 
 def get_item_detail(sku):
-    """Get full item detail by SKU, including vendor info."""
+    """Get full item detail by SKU, including vendor and buyer info."""
     conn = get_connection()
     try:
         cursor = conn.cursor()
@@ -138,23 +151,26 @@ def get_item_detail(sku):
             "i.VENDOR_NO, i.DATEADDED, i.MSRP, "
             "i.WEIGHT1, i.WEIGHT2, "
             "e.BRAND, e.EXTENDED_DESCRIPTION, "
-            "b.QOH_2, b.NET_COST, b.WHOLESALE_PRICE, "
-            "b.LAST_RECEIPT_COST, b.AVG_INV_COST, "
+            "b.QOH_2, b.WHOLESALE_PRICE, "
             "b.DATE_LR, b.DATE_LA, b.LAST_SALE, "
             "b.QTY_UOM2_PTD, b.QTY_UOM2_YTD, "
             "TRIM(l.LOCATION) AS LOCATION, "
             "COALESCE(m.NEW_FORECAST, 0) AS AVG_MOVEMENT, "
+            "TRIM(m.BUYER) AS BUYER_ID, "
             "TRIM(v.VENDOR_NAME) AS VENDOR_NAME, "
             "TRIM(v.VENDOR_CITY) AS VENDOR_CITY, "
             "TRIM(v.VENDOR_STATE) AS VENDOR_STATE, "
             "v.VENDOR_PHONE_NUMBER AS VENDOR_PHONE, "
-            "TRIM(v.VENDOR_CONTACT_1) AS VENDOR_CONTACT "
+            "TRIM(v.VENDOR_CONTACT_1) AS VENDOR_CONTACT, "
+            "TRIM(emp.NAME) AS BUYER_NAME, "
+            "TRIM(emp.PHONE) AS BUYER_PHONE "
             "FROM longmod.VITEMS i "
             "LEFT JOIN longmod.VITEM_EXT e ON i.SKU = e.SKU "
             "LEFT JOIN longmod.VITEM_BALANCE b ON i.SKU = b.SKU "
             "LEFT JOIN longmod.VLOCATIONS l ON i.SKU = l.SKU "
             "LEFT JOIN longmod.VITEM_MOVEMENT m ON i.SKU = m.SKU "
             "LEFT JOIN longmod.VVENDORS v ON i.VENDOR_NO = v.VENDOR_NUMBER "
+            "LEFT JOIN longmod.VEMPLOYEES emp ON m.BUYER = emp.EMPLOYEE_ID "
             "WHERE i.SKU = ?",
             (sku,),
         )
@@ -162,6 +178,13 @@ def get_item_detail(sku):
         if not row:
             return None
         columns = [desc[0] for desc in cursor.description]
-        return _strip_row(columns, row)
+        item = _strip_row(columns, row)
+
+        # Format CYYMMDD dates to MM/DD/YYYY
+        for key in ("DATE_LR", "DATE_LA", "LAST_SALE", "DATEADDED"):
+            if key in item:
+                item[key] = _format_cymd(item[key])
+
+        return item
     finally:
         conn.close()

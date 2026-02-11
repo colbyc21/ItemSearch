@@ -107,18 +107,8 @@
         <div class="detail-card">
             <h6>Pricing</h6>
             <dl>
-                <dt>Net Cost</dt>
-                <dd>{{ "$%.2f"|format(item.NET_COST) if item.NET_COST is not none else '-' }}</dd>
                 <dt>Wholesale Price</dt>
                 <dd>{{ "$%.2f"|format(item.WHOLESALE_PRICE) if item.WHOLESALE_PRICE is not none else '-' }}</dd>
-                {% if item.LAST_RECEIPT_COST %}
-                <dt>Last Receipt Cost</dt>
-                <dd>{{ "$%.2f"|format(item.LAST_RECEIPT_COST) }}</dd>
-                {% endif %}
-                {% if item.AVG_INV_COST %}
-                <dt>Avg Inventory Cost</dt>
-                <dd>{{ "$%.2f"|format(item.AVG_INV_COST) }}</dd>
-                {% endif %}
                 {% if item.MSRP %}
                 <dt>MSRP</dt>
                 <dd>{{ "$%.2f"|format(item.MSRP) }}</dd>
@@ -149,6 +139,30 @@
                 {% if item.VENDOR_PHONE %}
                 <dt>Phone</dt>
                 <dd>{{ item.VENDOR_PHONE }}</dd>
+                {% endif %}
+            </dl>
+        </div>
+    </div>
+
+    <!-- Buyer -->
+    <div class="col-md-6">
+        <div class="detail-card">
+            <h6>Buyer</h6>
+            <dl>
+                {% if item.BUYER_NAME %}
+                <dt>Name</dt>
+                <dd>{{ item.BUYER_NAME }}</dd>
+                {% endif %}
+                {% if item.BUYER_ID %}
+                <dt>ID</dt>
+                <dd>{{ item.BUYER_ID }}</dd>
+                {% endif %}
+                {% if item.BUYER_PHONE %}
+                <dt>Phone</dt>
+                <dd>{{ item.BUYER_PHONE }}</dd>
+                {% endif %}
+                {% if not item.BUYER_NAME and not item.BUYER_ID %}
+                <dd class="text-muted">No buyer assigned</dd>
                 {% endif %}
             </dl>
         </div>
