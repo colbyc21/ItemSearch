@@ -57,18 +57,35 @@
 {% endif %}
 </div>
 
+<!-- Scanner overlay -->
+<div id="scannerOverlay" class="scanner-overlay">
+    <button type="button" class="scanner-close" id="scannerClose">&times;</button>
+    <div id="scannerViewport" class="scanner-viewport"></div>
+</div>
+
+<button type="button" class="scan-fab" id="scanBtn" title="Scan barcode" style="display:none">
+    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M3 7V5a2 2 0 0 1 2-2h2"/><path d="M17 3h2a2 2 0 0 1 2 2v2"/>
+        <path d="M21 17v2a2 2 0 0 1-2 2h-2"/><path d="M7 21H5a2 2 0 0 1-2-2v-2"/>
+        <line x1="7" y1="12" x2="17" y2="12"/>
+    </svg>
+</button>
 {% endblock %}
 
 {% block scripts %}
 <script src="{{ url_for('static', filename='js/app.js') }}"></script>
 <script type="module">
 import {
-    SparkScan, SparkScanSettings, SparkScanView, SparkScanViewSettings,
+    BarcodeCapture, BarcodeCaptureSettings, BarcodeCaptureOverlay,
     Symbology, barcodeCaptureLoader
 } from "https://cdn.jsdelivr.net/npm/@scandit/web-datacapture-barcode@latest/+esm";
-import { DataCaptureContext } from "https://cdn.jsdelivr.net/npm/@scandit/web-datacapture-core@latest/+esm";
+import {
+    Camera, DataCaptureContext, DataCaptureView, FrameSourceState
+} from "https://cdn.jsdelivr.net/npm/@scandit/web-datacapture-core@latest/+esm";
 
 const SCANDIT_KEY = 'At8Hbmc5QHr8EvzGx/sG0Kc2d4cODT7sNCWU7OJAIqe0JvWqnwJqy5RVZgz3bzXiBiNjAnliRCziQIc3vnZJELVB8FanR6tgZWjFowYr5PH1LFVBjDsc5PERsAKHTaUM/kGsAn1gcRKtdtSUYURG+pVfRdmpYexAe2sUhhta+Zkad/z+RyGM9bdhn5P8ZjoeEyFSloZN9OKeTTSgQXjYvKpla2ndbv4Dg0tKTwNIoeL0RJ78XHPlqSthoacRYgpPfHB+/bpcAtKzYOhWNGPD3y1hghbLEtP1T1gFTQp+hLstYr6JdWsM1OpkMRLdZvIwo3ZymUVL8wf3e/8cR1ghXWhgojFRNjAkqHVNjilX3TVqW/aisGaplJZTZtGpbChj/2RdI49nnvluanC2m0dpeS8InPdSY5dNJgAZ0fpoLIN7bBDXunLOsQsfc+Z3PyJ2zBLW2NFoLzYwADBFhGYS295kgzIyS3IujFi5GFgYFl+leovIf39wX9sAmXTkfhYuz3rVurtOPM5+Ttp4FTA4qScTuZNpfB4UWsvx0yT2VRhiYhqo9JUWM6AdW05IoaWrzqevGiBe9yuBekoKi5/z7nR+wldgseYjxbZAZec9qKsM6ka6kbOO0Mob0t0gGquqyKwvUZVv3CWw75d53+uCjVKmMO1pWQZIf5c2PEKwQenaqwNb97L16Dl8GTREeCA513h1EwucHXnkUopF4Ej8zKhkqhBz1xXGEnL5wxa6alxJqk3y/xY0gZhTBAoC0lhDJkZqzlhKPldUL4to7po3JnSR0zGALyRkucwLyTp6Ol5livt+jzBwCRQEIQ7yYYPUbsqwzEA5yslVhLTPgf9GNNXaWkHVC4Sp1r+QVYOvBUADBHAod0KIIWHVgLmJ7WNaUGG9/VhPTl1ZmEU5KvFZy3xYBewxW+TrWMVEs2T9l4BRtznRi+uACe8fnxqWOewX7W+ExN1eyDedSpTogGvQDyGuRIjWQogxPsyY/De02aAB4/l8V/4PsplZyDi3z1A7eZScDkWEjnP2J6CrR3FMK602eX3+DcvWd/iZSH6XrJDAqUzcEH0oPZHp7F5DreixhZ72wrVTnv2ytgaZO5zSDwd4/8lxgKSZQOayrWZkerd3J9hixSXMW6TQfNlSFYndXwc7vEnjl7CesacHVzMbnQNFNZjHu765Y8aagm4OMZLOdFymrEjymHrPaKLs/yrgqyo=';
+
+let context, camera, barcodeCapture, view, scannerReady = false;
 
 function upceToUpca(upce) {
     if (upce.length !== 8 && upce.length !== 6) return upce;
@@ -92,44 +109,64 @@ function upceToUpca(upce) {
     return body + check;
 }
 
-async function initScandit() {
-    try {
-        const context = await DataCaptureContext.forLicenseKey(SCANDIT_KEY, {
-            libraryLocation: "https://cdn.jsdelivr.net/npm/@scandit/web-datacapture-barcode@latest/sdc-lib/",
-            moduleLoaders: [barcodeCaptureLoader()]
-        });
+async function initScanner() {
+    context = await DataCaptureContext.forLicenseKey(SCANDIT_KEY, {
+        libraryLocation: "https://cdn.jsdelivr.net/npm/@scandit/web-datacapture-barcode@latest/sdc-lib/",
+        moduleLoaders: [barcodeCaptureLoader()]
+    });
 
-        const settings = new SparkScanSettings();
-        settings.enableSymbologies([
-            Symbology.EAN13UPCA, Symbology.EAN8, Symbology.UPCE, Symbology.Code128
-        ]);
+    camera = Camera.pickBestGuess();
+    await camera.applySettings(BarcodeCapture.recommendedCameraSettings);
+    await context.setFrameSource(camera);
 
-        const sparkScan = SparkScan.forSettings(settings);
+    const settings = new BarcodeCaptureSettings();
+    settings.enableSymbologies([
+        Symbology.EAN13UPCA, Symbology.EAN8, Symbology.UPCE, Symbology.Code128
+    ]);
 
-        sparkScan.addListener({
-            didScan: (_, session) => {
-                const barcode = session.newlyRecognizedBarcode;
-                if (!barcode) return;
-                let code = barcode.data;
-                if (barcode.symbology === Symbology.UPCE || (code.length === 8 && code[0] === '0')) {
-                    code = upceToUpca(code);
-                }
-                document.getElementById('searchForm').dispatchEvent(
-                    new CustomEvent('camera-scan', { detail: code })
-                );
+    barcodeCapture = await BarcodeCapture.forContext(context, settings);
+    await barcodeCapture.setEnabled(false);
+
+    barcodeCapture.addListener({
+        didScan: async (_, session) => {
+            const barcode = session.newlyRecognizedBarcodes[0];
+            if (!barcode) return;
+            await barcodeCapture.setEnabled(false);
+            let code = barcode.data;
+            if (barcode.symbology === Symbology.UPCE || (code.length === 8 && code[0] === '0')) {
+                code = upceToUpca(code);
             }
-        });
+            closeScanner();
+            document.getElementById('searchForm').dispatchEvent(
+                new CustomEvent('camera-scan', { detail: code })
+            );
+        }
+    });
 
-        const viewSettings = new SparkScanViewSettings();
-        const view = SparkScanView.forElement(
-            document.body, context, sparkScan, viewSettings
-        );
-        await view.prepareScanning();
-    } catch (e) {
-        console.error('Scandit init failed:', e);
-    }
+    view = new DataCaptureView();
+    view.connectToElement(document.getElementById('scannerViewport'));
+    await view.setContext(context);
+    await BarcodeCaptureOverlay.withBarcodeCaptureForView(barcodeCapture, view);
+
+    scannerReady = true;
 }
 
-initScandit();
+async function openScanner() {
+    document.getElementById('scannerOverlay').classList.add('active');
+    if (!scannerReady) await initScanner();
+    await camera.switchToDesiredState(FrameSourceState.On);
+    await barcodeCapture.setEnabled(true);
+}
+
+async function closeScanner() {
+    document.getElementById('scannerOverlay').classList.remove('active');
+    if (barcodeCapture) await barcodeCapture.setEnabled(false);
+    if (camera) await camera.switchToDesiredState(FrameSourceState.Off);
+}
+
+// Show FAB and wire up events
+document.getElementById('scanBtn').style.display = '';
+document.getElementById('scanBtn').addEventListener('click', openScanner);
+document.getElementById('scannerClose').addEventListener('click', closeScanner);
 </script>
 {% endblock %}
