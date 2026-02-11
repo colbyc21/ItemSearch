@@ -323,11 +323,9 @@ body {
     box-shadow: var(--shadow);
     cursor: pointer;
     transition: border-color var(--transition), box-shadow var(--transition);
-    display: grid;
-    grid-template-columns: 1fr auto;
-    grid-template-rows: auto auto;
-    gap: .1rem .75rem;
-    align-items: start;
+    display: flex;
+    align-items: center;
+    gap: .75rem;
 }
 
 .item-card:hover {
@@ -338,6 +336,7 @@ body {
 /* Left side: description + meta */
 .item-card-body {
     min-width: 0;
+    flex: 1;
 }
 
 .item-card-title {
@@ -365,7 +364,7 @@ body {
     flex-direction: column;
     align-items: flex-end;
     gap: .35rem;
-    grid-row: 1 / -1;
+    flex-shrink: 0;
 }
 
 .loc-badge {
