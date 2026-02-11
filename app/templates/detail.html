@@ -84,6 +84,12 @@
                 <dd>{{ item.LOCATION or '-' }}</dd>
                 <dt>Qty on Hand</dt>
                 <dd>{{ item.QOH_2 if item.QOH_2 is not none else '-' }}</dd>
+                <dt>Allocated</dt>
+                <dd>{{ item.ALLOCATED_2 if item.ALLOCATED_2 is not none else '-' }}</dd>
+                <dt>Available</dt>
+                <dd>{{ (item.QOH_2 - item.ALLOCATED_2) if item.QOH_2 is not none and item.ALLOCATED_2 is not none else '-' }}</dd>
+                <dt>On Order</dt>
+                <dd>{{ item.QTY_OO if item.QTY_OO is not none else '-' }}</dd>
                 <dt>Avg Weekly Movement</dt>
                 <dd>{{ item.AVG_MOVEMENT }}</dd>
                 <dt>Sold PTD</dt>

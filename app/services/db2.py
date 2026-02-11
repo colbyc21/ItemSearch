@@ -151,7 +151,7 @@ def get_item_detail(sku):
             "i.VENDOR_NO, i.DATEADDED, i.MSRP, "
             "i.WEIGHT1, i.WEIGHT2, "
             "e.BRAND, e.EXTENDED_DESCRIPTION, "
-            "b.QOH_2, b.WHOLESALE_PRICE, "
+            "b.QOH_2, b.ALLOCATED_2, b.QTY_OO, b.WHOLESALE_PRICE, "
             "b.DATE_LR, b.DATE_LA, b.LAST_SALE, "
             "b.QTY_UOM2_PTD, b.QTY_UOM2_YTD, "
             "TRIM(l.LOCATION) AS LOCATION, "
