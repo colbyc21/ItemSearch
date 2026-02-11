@@ -42,6 +42,10 @@
                 <dt>MFG #</dt>
                 <dd>{{ item.MFG_NO }}</dd>
                 {% endif %}
+                {% if item.VEND_ALT_SKU and item.VEND_ALT_SKU.strip() %}
+                <dt>{{ item.VEND_ALT or 'Alt Vendor' }} #</dt>
+                <dd>{{ item.VEND_ALT_SKU }}</dd>
+                {% endif %}
                 <dt>Category</dt>
                 <dd>{{ item.CATEGORY }}</dd>
                 <dt>Status</dt>

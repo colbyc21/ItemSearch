@@ -43,9 +43,9 @@ def _build_fuzzy_where(words):
         like = f"%{word.upper()}%"
         conditions.append(
             "(UPPER(i.DESCRIPTION) LIKE ? OR UPPER(e.BRAND) LIKE ? "
-            "OR UPPER(i.MFG_NO) LIKE ?)"
+            "OR UPPER(i.MFG_NO) LIKE ? OR UPPER(m.VEND_ALT_SKU) LIKE ?)"
         )
-        params.extend([like, like, like])
+        params.extend([like, like, like, like])
     return " AND ".join(conditions), params
 
 
@@ -74,10 +74,10 @@ def search_items(term):
                 "LEFT JOIN longmod.VLOCATIONS l ON i.SKU = l.SKU "
                 "LEFT JOIN longmod.VITEM_MOVEMENT m ON i.SKU = m.SKU "
                 "WHERE i.SKU = ? OR UPPER(i.DESCRIPTION) LIKE ? "
-                "OR TRIM(i.MFG_NO) LIKE ? "
+                "OR TRIM(i.MFG_NO) LIKE ? OR TRIM(m.VEND_ALT_SKU) LIKE ? "
                 "ORDER BY COALESCE(m.NEW_FORECAST, 0) DESC "
                 "FETCH FIRST 50 ROWS ONLY",
-                (int(term), like_term, like_term),
+                (int(term), like_term, like_term, like_term),
             )
         else:
             words = term.split()
@@ -158,6 +158,8 @@ def get_item_detail(sku):
             "TRIM(l.LOCATION) AS LOCATION, "
             "COALESCE(m.NEW_FORECAST, 0) AS AVG_MOVEMENT, "
             "TRIM(m.BUYER) AS BUYER_ID, "
+            "TRIM(m.VEND_ALT) AS VEND_ALT, "
+            "TRIM(m.VEND_ALT_SKU) AS VEND_ALT_SKU, "
             "TRIM(v.VENDOR_NAME) AS VENDOR_NAME, "
             "TRIM(v.VENDOR_CITY) AS VENDOR_CITY, "
             "TRIM(v.VENDOR_STATE) AS VENDOR_STATE, "
