@@ -7,13 +7,6 @@
             <input type="text" name="q" id="searchInput" class="form-control search-input"
                    placeholder="Search by item name, SKU, or scan barcode..."
                    value="{{ query }}" autofocus autocomplete="off">
-            <button type="button" class="btn btn-scan" id="scanBtn" title="Scan barcode with camera">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M3 7V5a2 2 0 0 1 2-2h2"/><path d="M17 3h2a2 2 0 0 1 2 2v2"/>
-                    <path d="M21 17v2a2 2 0 0 1-2 2h-2"/><path d="M7 21H5a2 2 0 0 1-2-2v-2"/>
-                    <line x1="7" y1="12" x2="17" y2="12"/>
-                </svg>
-            </button>
             <button type="submit" class="btn btn-brand">Search</button>
         </div>
     </form>
@@ -63,6 +56,14 @@
 <div class="alert alert-warning mt-3">No items found.</div>
 {% endif %}
 </div>
+
+<button type="button" class="scan-fab" id="scanBtn" title="Scan barcode" style="display:none">
+    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M3 7V5a2 2 0 0 1 2-2h2"/><path d="M17 3h2a2 2 0 0 1 2 2v2"/>
+        <path d="M21 17v2a2 2 0 0 1-2 2h-2"/><path d="M7 21H5a2 2 0 0 1-2-2v-2"/>
+        <line x1="7" y1="12" x2="17" y2="12"/>
+    </svg>
+</button>
 {% endblock %}
 
 {% block scripts %}
@@ -78,7 +79,8 @@ async function initCamera() {
     if (!hasCamera) return;
     try {
         await StrichSDK.initialize(STRICH_KEY);
-        btn.onclick = openCameraScanner;
+        btn.style.display = '';
+        btn.addEventListener('click', openCameraScanner);
     } catch (e) {
         console.error('STRICH init failed:', e);
     }

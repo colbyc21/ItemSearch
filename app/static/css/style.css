@@ -93,24 +93,39 @@ body {
     box-shadow: 0 0 0 3px rgba(26,115,232,.15) !important;
 }
 
-.btn-scan {
-    background: var(--surface);
-    border: 2px solid var(--border);
-    border-left: none;
-    color: var(--text-muted);
-    padding: .75rem .85rem;
-    transition: all var(--transition);
-}
-
-.btn-scan:hover {
-    background: var(--surface-alt);
-    color: var(--brand);
-}
-
 .search-form .btn-brand {
     padding: .75rem 1.5rem;
     font-size: 1rem;
     border-radius: 0 var(--radius) var(--radius) 0;
+}
+
+/* ── Scan FAB ─────────────────────────────────────────── */
+.scan-fab {
+    position: fixed;
+    bottom: 1.5rem;
+    right: 1.5rem;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: var(--brand);
+    color: #fff;
+    border: none;
+    box-shadow: 0 4px 14px rgba(26,115,232,.4);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1020;
+    transition: transform var(--transition), box-shadow var(--transition);
+}
+
+.scan-fab:hover {
+    transform: scale(1.08);
+    box-shadow: 0 6px 20px rgba(26,115,232,.5);
+}
+
+.scan-fab:active {
+    transform: scale(.95);
 }
 
 /* ── Scanner ───────────────────────────────────────────── */
