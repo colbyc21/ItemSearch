@@ -73,8 +73,9 @@ def search_items(term):
                 "LEFT JOIN longmod.VITEM_BALANCE b ON i.SKU = b.SKU "
                 "LEFT JOIN longmod.VLOCATIONS l ON i.SKU = l.SKU "
                 "LEFT JOIN longmod.VITEM_MOVEMENT m ON i.SKU = m.SKU "
-                "WHERE i.SKU = ? OR UPPER(i.DESCRIPTION) LIKE ? "
-                "OR TRIM(i.MFG_NO) LIKE ? OR TRIM(m.VEND_ALT_SKU) LIKE ? "
+                "WHERE i.STATUS = 'A' AND "
+                "(i.SKU = ? OR UPPER(i.DESCRIPTION) LIKE ? "
+                "OR TRIM(i.MFG_NO) LIKE ? OR TRIM(m.VEND_ALT_SKU) LIKE ?) "
                 "ORDER BY COALESCE(m.NEW_FORECAST, 0) DESC "
                 "FETCH FIRST 50 ROWS ONLY",
                 (int(term), like_term, like_term, like_term),
@@ -96,7 +97,7 @@ def search_items(term):
                 "LEFT JOIN longmod.VITEM_BALANCE b ON i.SKU = b.SKU "
                 "LEFT JOIN longmod.VLOCATIONS l ON i.SKU = l.SKU "
                 "LEFT JOIN longmod.VITEM_MOVEMENT m ON i.SKU = m.SKU "
-                f"WHERE {where_clause} "
+                f"WHERE i.STATUS = 'A' AND {where_clause} "
                 "ORDER BY COALESCE(m.NEW_FORECAST, 0) DESC "
                 "FETCH FIRST 50 ROWS ONLY",
                 params,
@@ -128,7 +129,8 @@ def search_by_upc(upc):
             "LEFT JOIN longmod.VITEM_BALANCE b ON i.SKU = b.SKU "
             "LEFT JOIN longmod.VLOCATIONS l ON i.SKU = l.SKU "
             "LEFT JOIN longmod.VITEM_MOVEMENT m ON i.SKU = m.SKU "
-            "WHERE TRIM(i.UPC1) = ? OR TRIM(i.UPC2) = ? OR TRIM(i.UPC3) = ? "
+            "WHERE i.STATUS = 'A' AND "
+            "(TRIM(i.UPC1) = ? OR TRIM(i.UPC2) = ? OR TRIM(i.UPC3) = ?) "
             "ORDER BY COALESCE(m.NEW_FORECAST, 0) DESC "
             "FETCH FIRST 50 ROWS ONLY",
             (upc, upc, upc),
