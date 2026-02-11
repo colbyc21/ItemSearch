@@ -166,7 +166,7 @@ async function initScanner() {
             if (barcode.symbology === Symbology.UPCE || (code.length === 8 && code[0] === '0')) {
                 code = upceToUpca(code);
             }
-            closeScanner();
+            await closeScanner();
             document.getElementById('searchForm').dispatchEvent(
                 new CustomEvent('camera-scan', { detail: code })
             );
