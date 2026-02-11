@@ -3,7 +3,7 @@
 {% block title %}{{ item.DESCRIPTION if item else 'Item' }} - Item Search{% endblock %}
 
 {% block content %}
-<a href="{{ url_for('search.index', q=request.args.get('q', '')) }}" class="btn-back mb-3">
+<a href="javascript:history.back()" class="btn-back mb-3">
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
     Back to results
 </a>
