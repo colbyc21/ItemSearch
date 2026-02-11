@@ -4,9 +4,17 @@ document.addEventListener("DOMContentLoaded", function () {
     var resultsContainer = document.getElementById("resultsContainer");
     var debounceTimer = null;
     var currentRequest = null;
+    var awaitingNewScan = false;
 
     // Keep focus on search input for physical barcode scanners
     searchInput.focus();
+
+    // Re-focus search input when tapping outside (wedge scanner support)
+    document.addEventListener("click", function (e) {
+        if (!e.target.closest(".item-card") && !e.target.closest("a") && !e.target.closest("button")) {
+            searchInput.focus();
+        }
+    });
 
     // Prevent form submit — let live search handle it
     searchForm.addEventListener("submit", function (e) {
@@ -14,10 +22,23 @@ document.addEventListener("DOMContentLoaded", function () {
         doSearch(searchInput.value.trim());
     });
 
+    // Camera scan triggers search directly
+    searchForm.addEventListener("camera-scan", function (e) {
+        awaitingNewScan = false;
+        resultsContainer.innerHTML = "";
+        doSearch(e.detail);
+    });
+
     // Debounced live search on keystroke
     searchInput.addEventListener("input", function () {
         var q = searchInput.value.trim();
         clearTimeout(debounceTimer);
+
+        // Clear old results when new input arrives after a completed scan
+        if (awaitingNewScan) {
+            resultsContainer.innerHTML = "";
+            awaitingNewScan = false;
+        }
 
         if (!q) {
             resultsContainer.innerHTML = "";
@@ -52,6 +73,11 @@ document.addEventListener("DOMContentLoaded", function () {
                 currentRequest = null;
                 updateUrl(q);
                 renderResults(q, data);
+
+                // Clear input and refocus for next scan
+                searchInput.value = "";
+                searchInput.focus();
+                awaitingNewScan = true;
             })
             .catch(function (err) {
                 if (err.name !== "AbortError") {

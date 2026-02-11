@@ -112,16 +112,27 @@ async function openCameraScanner() {
     const barcodes = await PopupScanner.scan({
         symbologies: ['ean13', 'ean8', 'upca', 'upce', 'code128'],
         labels: { title: 'Scan Barcode' },
-        feedback: { audio: true, vibration: true }
+        feedback: { audio: true, vibration: true },
+        resolution: 'full-hd',
+        frameSource: {
+            constraints: {
+                video: {
+                    facingMode: 'environment',
+                    focusMode: { ideal: 'continuous' },
+                    width: { ideal: 1920 },
+                    height: { ideal: 1080 }
+                }
+            }
+        }
     });
     if (barcodes && barcodes.length > 0) {
         let code = barcodes[0].data;
         if (barcodes[0].symbology === 'upce' || (code.length === 8 && code[0] === '0')) {
             code = upceToUpca(code);
         }
-        const input = document.getElementById('searchInput');
-        input.value = code;
-        input.dispatchEvent(new Event('input'));
+        document.getElementById('searchForm').dispatchEvent(
+            new CustomEvent('camera-scan', { detail: code })
+        );
     }
 }
 
