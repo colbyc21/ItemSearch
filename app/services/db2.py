@@ -74,9 +74,10 @@ def search_items(term):
                 "LEFT JOIN longmod.VLOCATIONS l ON i.SKU = l.SKU "
                 "LEFT JOIN longmod.VITEM_MOVEMENT m ON i.SKU = m.SKU "
                 "WHERE i.SKU = ? OR UPPER(i.DESCRIPTION) LIKE ? "
+                "OR TRIM(i.MFG_NO) LIKE ? "
                 "ORDER BY COALESCE(m.NEW_FORECAST, 0) DESC "
                 "FETCH FIRST 50 ROWS ONLY",
-                (int(term), like_term),
+                (int(term), like_term, like_term),
             )
         else:
             words = term.split()
