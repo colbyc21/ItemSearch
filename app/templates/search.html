@@ -127,6 +127,7 @@ async function initScanner() {
 
     // 5. Create context (loads WASM - the slow part)
     context = await DataCaptureContext.forLicenseKey(SCANDIT_KEY, {
+        libraryLocation: "https://cdn.jsdelivr.net/npm/@scandit/web-datacapture-barcode@8.1.1/sdc-lib/",
         moduleLoaders: [barcodeCaptureLoader()]
     });
     view.hideProgressBar();
