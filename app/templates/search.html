@@ -110,7 +110,13 @@ function upceToUpca(upce) {
 
 async function openCameraScanner() {
     const barcodes = await PopupScanner.scan({
-        symbologies: ['ean13', 'ean8', 'upca', 'upce', 'code128'],
+        symbologies: [
+            { name: 'ean13', qz: 3 },
+            { name: 'ean8', qz: 3 },
+            { name: 'upca', qz: 3 },
+            { name: 'upce', qz: 3 },
+            { name: 'code128', qz: 3 }
+        ],
         labels: { title: 'Scan Barcode' },
         feedback: { audio: true, vibration: true },
         resolution: 'full-hd',
@@ -123,6 +129,11 @@ async function openCameraScanner() {
                     height: { ideal: 1080 }
                 }
             }
+        },
+        overlay: {
+            showFlashlight: true,
+            showTargetingLine: true,
+            focusOnTap: true
         }
     });
     if (barcodes && barcodes.length > 0) {
