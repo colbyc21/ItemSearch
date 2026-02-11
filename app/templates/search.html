@@ -24,6 +24,7 @@
     </div>
 </div>
 
+<div id="resultsContainer">
 {% if error %}
 <div class="alert alert-danger mt-3">
     Database error: {{ error }}
@@ -70,6 +71,7 @@
 {% elif query and not error %}
 <div class="alert alert-warning mt-3">No items found.</div>
 {% endif %}
+</div>
 {% endblock %}
 
 {% block scripts %}
