@@ -99,28 +99,26 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     function renderItemCard(item, sku) {
+        var loc = item.LOCATION || "";
+        var qoh = item.QOH_2;
+        var qohNum = qoh != null ? Math.round(qoh) : null;
+        var qohClass = qohNum !== null && qohNum > 0 ? "qoh-in-stock" : "qoh-out";
+        var qohText = qohNum !== null ? qohNum + " on hand" : "—";
+        var locClass = loc ? "loc-badge" : "loc-badge loc-badge-empty";
+        var locText = loc || "No loc";
+
+        var meta = '<span>SKU ' + sku + '</span>';
+        if (item.SIZE) meta += '<span>' + escapeHtml(item.SIZE) + '</span>';
+        if (item.QTY2 != null) meta += '<span>' + item.QTY2 + ' pk</span>';
+
         return '<div class="item-card" onclick="window.location=\'/item/' + sku + '\'">' +
-            '<div class="item-card-header">' +
-                '<h5 class="item-card-title">' + escapeHtml(item.DESCRIPTION || "") + '</h5>' +
-                '<span class="sku-badge">SKU ' + sku + '</span>' +
+            '<div class="item-card-body">' +
+                '<div class="item-card-title">' + escapeHtml(item.DESCRIPTION || "") + '</div>' +
+                '<div class="item-card-meta">' + meta + '</div>' +
             '</div>' +
-            '<div class="item-card-grid">' +
-                '<div class="item-card-field">' +
-                    '<div class="item-card-label">Size</div>' +
-                    '<div class="item-card-value">' + escapeHtml(item.SIZE || "—") + '</div>' +
-                '</div>' +
-                '<div class="item-card-field">' +
-                    '<div class="item-card-label">Pack</div>' +
-                    '<div class="item-card-value">' + (item.QTY2 != null ? item.QTY2 : "—") + '</div>' +
-                '</div>' +
-                '<div class="item-card-field">' +
-                    '<div class="item-card-label">Location</div>' +
-                    '<div class="item-card-value">' + escapeHtml(item.LOCATION || "—") + '</div>' +
-                '</div>' +
-                '<div class="item-card-field">' +
-                    '<div class="item-card-label">QOH</div>' +
-                    '<div class="item-card-value">' + (item.QOH_2 != null ? item.QOH_2 : "—") + '</div>' +
-                '</div>' +
+            '<div class="item-card-badges">' +
+                '<div class="' + locClass + '">' + escapeHtml(locText) + '</div>' +
+                '<div class="qoh-badge ' + qohClass + '">' + qohText + '</div>' +
             '</div>' +
         '</div>';
     }

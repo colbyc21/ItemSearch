@@ -312,17 +312,22 @@ body {
 .item-card-list {
     display: flex;
     flex-direction: column;
-    gap: .6rem;
+    gap: .5rem;
 }
 
 .item-card {
     background: var(--surface);
     border: 1px solid var(--border);
     border-radius: var(--radius);
-    padding: 1rem 1.25rem;
+    padding: 1rem 1.15rem;
     box-shadow: var(--shadow);
     cursor: pointer;
     transition: border-color var(--transition), box-shadow var(--transition);
+    display: grid;
+    grid-template-columns: 1fr auto;
+    grid-template-rows: auto auto;
+    gap: .1rem .75rem;
+    align-items: start;
 }
 
 .item-card:hover {
@@ -330,40 +335,74 @@ body {
     box-shadow: var(--shadow-md);
 }
 
-.item-card-header {
-    display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
-    gap: .75rem;
-    margin-bottom: .75rem;
-    flex-wrap: wrap;
+/* Left side: description + meta */
+.item-card-body {
+    min-width: 0;
 }
 
 .item-card-title {
-    font-size: 1rem;
+    font-size: .95rem;
     font-weight: 700;
-    margin: 0;
+    margin: 0 0 .35rem 0;
     line-height: 1.3;
 }
 
-.item-card-grid {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: .5rem;
-}
-
-.item-card-label {
-    font-size: .7rem;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: .04em;
+.item-card-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .15rem .6rem;
+    font-size: .8rem;
     color: var(--text-muted);
-    margin-bottom: .1rem;
 }
 
-.item-card-value {
-    font-size: .95rem;
-    font-weight: 600;
+.item-card-meta span {
+    white-space: nowrap;
+}
+
+/* Right side: location + QOH hero badges */
+.item-card-badges {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: .35rem;
+    grid-row: 1 / -1;
+}
+
+.loc-badge {
+    background: var(--brand);
+    color: #fff;
+    font-size: 1rem;
+    font-weight: 700;
+    padding: .3rem .7rem;
+    border-radius: var(--radius-sm);
+    letter-spacing: .01em;
+    line-height: 1.2;
+    white-space: nowrap;
+}
+
+.loc-badge-empty {
+    background: var(--surface-alt);
+    color: var(--text-muted);
+    border: 1px solid var(--border);
+}
+
+.qoh-badge {
+    font-size: .85rem;
+    font-weight: 700;
+    padding: .2rem .55rem;
+    border-radius: var(--radius-sm);
+    white-space: nowrap;
+    line-height: 1.2;
+}
+
+.qoh-in-stock {
+    background: var(--success-bg);
+    color: var(--success);
+}
+
+.qoh-out {
+    background: var(--danger-bg);
+    color: var(--danger);
 }
 
 /* ── Responsive ────────────────────────────────────────── */
@@ -384,7 +423,12 @@ body {
         padding: .5rem;
     }
 
-    .item-card-grid {
-        grid-template-columns: repeat(2, 1fr);
+    .item-card {
+        padding: .85rem 1rem;
+    }
+
+    .loc-badge {
+        font-size: .9rem;
+        padding: .25rem .6rem;
     }
 }

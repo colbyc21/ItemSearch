@@ -40,27 +40,20 @@
 {% if results %}
 <div class="item-card-list">
     {% for item in results %}
+    {% set qoh = item.QOH_2 %}
     <div class="item-card" onclick="window.location='/item/{{ item.SKU|int }}'">
-        <div class="item-card-header">
-            <h5 class="item-card-title">{{ item.DESCRIPTION }}</h5>
-            <span class="sku-badge">SKU {{ item.SKU }}</span>
+        <div class="item-card-body">
+            <div class="item-card-title">{{ item.DESCRIPTION }}</div>
+            <div class="item-card-meta">
+                <span>SKU {{ item.SKU }}</span>
+                {% if item.SIZE %}<span>{{ item.SIZE }}</span>{% endif %}
+                {% if item.QTY2 is not none %}<span>{{ item.QTY2 }} pk</span>{% endif %}
+            </div>
         </div>
-        <div class="item-card-grid">
-            <div class="item-card-field">
-                <div class="item-card-label">Size</div>
-                <div class="item-card-value">{{ item.SIZE or '—' }}</div>
-            </div>
-            <div class="item-card-field">
-                <div class="item-card-label">Pack</div>
-                <div class="item-card-value">{{ item.QTY2 if item.QTY2 is not none else '—' }}</div>
-            </div>
-            <div class="item-card-field">
-                <div class="item-card-label">Location</div>
-                <div class="item-card-value">{{ item.LOCATION or '—' }}</div>
-            </div>
-            <div class="item-card-field">
-                <div class="item-card-label">QOH</div>
-                <div class="item-card-value">{{ item.QOH_2 if item.QOH_2 is not none else '—' }}</div>
+        <div class="item-card-badges">
+            <div class="loc-badge{% if not item.LOCATION %} loc-badge-empty{% endif %}">{{ item.LOCATION or 'No loc' }}</div>
+            <div class="qoh-badge {% if qoh is not none and qoh > 0 %}qoh-in-stock{% else %}qoh-out{% endif %}">
+                {{ '%d on hand' | format(qoh | int) if qoh is not none else '—' }}
             </div>
         </div>
     </div>
