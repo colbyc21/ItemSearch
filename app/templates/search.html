@@ -50,8 +50,10 @@
                 <th>Brand</th>
                 <th>Size</th>
                 <th>Pack</th>
+                <th>Location</th>
                 <th>UPC</th>
                 <th>QOH</th>
+                <th>Avg Mvmt</th>
             </tr>
         </thead>
         <tbody>
@@ -62,8 +64,10 @@
                 <td>{{ item.BRAND or '' }}</td>
                 <td>{{ item.SIZE }}</td>
                 <td>{{ item.QTY2 }}</td>
+                <td class="text-nowrap">{{ item.LOCATION or '' }}</td>
                 <td class="text-nowrap">{{ item.UPC1 or '' }}</td>
                 <td>{{ item.QOH_2 if item.QOH_2 is not none else '-' }}</td>
+                <td>{{ item.AVG_MOVEMENT if item.AVG_MOVEMENT else '-' }}</td>
             </tr>
             {% endfor %}
         </tbody>
