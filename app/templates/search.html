@@ -59,9 +59,9 @@
 
 <!-- Scanner overlay -->
 <div id="scannerOverlay" class="scanner-overlay">
-    <button type="button" class="scanner-close" id="scannerClose">&times;</button>
     <div id="scannerViewport" class="scanner-viewport"></div>
 </div>
+<button type="button" class="scanner-close" id="scannerClose" style="display:none">&times;</button>
 
 <button type="button" class="scan-fab" id="scanBtn" title="Scan barcode" style="display:none">
     <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -179,13 +179,16 @@ async function initScanner() {
 }
 
 async function openScanner() {
-    document.getElementById('scannerOverlay').classList.add('active');
+    const ol = document.getElementById('scannerOverlay');
+    ol.classList.add('active');
+    ol.style.display = 'flex';
+    document.getElementById('scannerClose').style.display = '';
     if (!scannerReady) {
         try {
             await initScanner();
         } catch (e) {
             console.error('Scanner init failed:', e);
-            closeScanner();
+            await closeScanner();
             return;
         }
     } else {
@@ -196,7 +199,12 @@ async function openScanner() {
 }
 
 async function closeScanner() {
-    document.getElementById('scannerOverlay').classList.remove('active');
+    // Hide overlay + close button immediately (synchronous)
+    const ol = document.getElementById('scannerOverlay');
+    ol.classList.remove('active');
+    ol.style.display = 'none';
+    document.getElementById('scannerClose').style.display = 'none';
+    // Then async cleanup
     if (barcodeCapture) await barcodeCapture.setEnabled(false);
     if (camera) await camera.switchToDesiredState(FrameSourceState.Off);
 }
