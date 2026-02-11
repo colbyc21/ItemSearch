@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="search-wrapper">
+    <form method="GET" action="/" class="search-form" id="searchForm">
+        <div class="input-group">
+            <input type="text" name="q" id="searchInput" class="form-control search-input"
+                   placeholder="Search by item name, SKU, or scan barcode..."
+                   value="{{ query }}" autofocus autocomplete="off">
+            <button type="button" class="btn btn-scan" id="scanBtn" title="Scan barcode with camera">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M3 7V5a2 2 0 0 1 2-2h2"/><path d="M17 3h2a2 2 0 0 1 2 2v2"/>
+                    <path d="M21 17v2a2 2 0 0 1-2 2h-2"/><path d="M7 21H5a2 2 0 0 1-2-2v-2"/>
+                    <line x1="7" y1="12" x2="17" y2="12"/>
+                </svg>
+            </button>
+            <button type="submit" class="btn btn-brand">Search</button>
+        </div>
+    </form>
+
+    <div id="scannerContainer" class="scanner-container d-none">
+        <div id="reader"></div>
+        <button type="button" class="btn btn-sm btn-secondary mt-2" id="stopScanBtn">Stop Scanner</button>
+    </div>
+</div>
+
+{% if error %}
+<div class="alert alert-danger mt-3">
+    Database error: {{ error }}
+</div>
+{% endif %}
+
+{% if query and not error %}
+<div class="results-meta mt-3 mb-2">
+    <span class="text-muted">
+        {{ results|length }} result{{ 's' if results|length != 1 else '' }}
+        for "{{ query }}"
+        {% if search_type == 'upc' %}<span class="badge bg-info">UPC</span>{% endif %}
+    </span>
+</div>
+{% endif %}
+
+{% if results %}
+<div class="table-responsive">
+    <table class="table data-table">
+        <thead>
+            <tr>
+                <th>SKU</th>
+                <th>Description</th>
+                <th>Brand</th>
+                <th>Size</th>
+                <th>Pack</th>
+                <th>UPC</th>
+                <th>QOH</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in results %}
+            <tr>
+                <td class="fw-bold">{{ item.SKU }}</td>
+                <td>{{ item.DESCRIPTION }}</td>
+                <td>{{ item.BRAND or '' }}</td>
+                <td>{{ item.SIZE }}</td>
+                <td>{{ item.QTY2 }}</td>
+                <td class="text-nowrap">{{ item.UPC1 or '' }}</td>
+                <td>{{ item.QOH_2 if item.QOH_2 is not none else '-' }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% elif query and not error %}
+<div class="alert alert-warning mt-3">No items found.</div>
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+<script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+<script src="{{ url_for('static', filename='js/app.js') }}"></script>
+{% endblock %}
